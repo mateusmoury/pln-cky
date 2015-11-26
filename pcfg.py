@@ -1,6 +1,7 @@
 from queue import Queue
-from nltk import Tree
+from nltk import Tree, treetransforms
 from collections import defaultdict
+from copy import deepcopy
 
 class PCFG:
 
@@ -8,6 +9,17 @@ class PCFG:
     self.parsed_sentences = parsed_sentences
     self.rules = defaultdict(lambda: 0.0)
     self.symbol_frequencies = defaultdict(lambda: 0.0)
+
+  def chomsky_normal_form(self):
+    chomsky_parsed_senteces = []
+    for parsed_sentence in self.parsed_sentences:
+      tree = deepcopy(parsed_sentence)
+      treetransforms.collapse_unary(tree)
+      cnfTree = deepcopy(tree)
+      treetransforms.chomsky_normal_form(cnfTree)
+      chomsky_parsed_senteces.append(cnfTree)
+    self.parsed_sentences = chomsky_parsed_senteces
+
 
   def generate_rules(self):
     for parsed_sentence in self.parsed_sentences:
@@ -28,6 +40,7 @@ class PCFG:
       self.rules[k] = v / self.symbol_frequencies[k[0]]
 
   def run(self):
+    # self.chomsky_normal_form()
     self.generate_rules()
     self.generate_probabilities()
 
